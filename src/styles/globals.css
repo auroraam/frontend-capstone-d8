@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f3f3f3;
+  --foreground: #171717;
+  --font-sans: var(--font-comic);
+
+  --satu: #FFFBDE;
+  --dua: #90D1CA;
+  --tiga: #129990;
+  --empat: #096B68;
+  --bg: #f3f3f3;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'comic', Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .satu-bg {
+    @apply bg-[var(--satu)];
+  }
+  .satu-text {
+    @apply text-[var(--satu)];
+  }
+  .dua-bg {
+    @apply bg-[var(--dua)];
+  }
+  .dua-text {
+    @apply text-[var(--dua)];
+  }
+  .tiga-bg {
+    @apply bg-[var(--tiga)];
+  }
+  .tiga-text {
+    @apply text-[var(--tiga)];
+  }
+  .empat-bg {
+    @apply bg-[var(--empat)];
+  }
+  .empat-text {
+    @apply text-[var(--empat)];
+  }
+  .empat-border {
+    @apply border border-[var(--empat)] border-3;
+  }
+  .bg-bg {
+    @apply bg-[var(--bg)];
+  }
+}
