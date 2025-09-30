@@ -80,8 +80,7 @@ export default function Home() {
               Klasifikasi dan Prediksi Tingkat Kematangan
             </h2>
             <p className="mt-2 tiga-text">
-              Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-              dan machine learning.
+              Prediksi kematangan buah pisang yang lebih akurat menggunakan sistem dengan sensor gas, sensor warna, dan kecerdasan buatan.
             </p>
             <div className="flex flex-row justify-between gap-3">
               <button 
@@ -118,8 +117,7 @@ export default function Home() {
                   Kategori Kematangan: {result.klasifikasi}
                 </h2>
                 <p className="mt-2 empat-text text-xs">
-                  Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                  dan Machine Learning.
+                  Kategori ini menunjukkan tingkat kematangan buah berdasarkan hasil analisis sensor warna yang diproses menggunakan algoritma Machine Learning. Nilai ini membantu menentukan apakah buah sudah matang, masih mentah, atau busuk.
                 </p>
               </div>
             </div>
@@ -137,8 +135,7 @@ export default function Home() {
                   Hari Menuju Matang: {result.prediksi}
                 </h2>
                 <p className="mt-2 empat-text text-xs">
-                  Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                  dan Machine Learning.
+                  Perkiraan jumlah hari yang dibutuhkan hingga buah mencapai tingkat kematangan ideal. Nilai ini dihitung dari pola perubahan gas yang terdeteksi oleh sensor, sehingga pengguna dapat mengetahui waktu terbaik untuk memanen atau mengonsumsi buah.
                 </p>
               </div>
             </div>
@@ -159,8 +156,7 @@ export default function Home() {
                 TVOC
               </h2>
               <p className="mt-2 text-white text-xs">
-                Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                dan Machine Learning.
+                Menunjukkan total senyawa organik volatil yang dilepaskan oleh buah selama proses pematangan. Semakin tinggi nilai TVOC, umumnya menandakan bahwa buah sedang berada pada fase aktif pematangan akibat peningkatan aktivitas biokimia di dalamnya.
               </p>
             </div>
             <div className="flex flex-col tiga-bg p-4 rounded-lg">
@@ -168,11 +164,10 @@ export default function Home() {
                 = {result.co2}
               </h2>
               <h2 className="text-xl font-bold text-white">
-                CO2eq
+                CO₂eq
               </h2>
               <p className="mt-2 text-white text-xs">
-                Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                dan Machine Learning.
+                Menggambarkan jumlah gas karbon dioksida ekuivalen yang dihasilkan oleh buah. Nilai ini berhubungan dengan proses respirasi buah—semakin matang buah, biasanya semakin tinggi kadar CO₂ yang terdeteksi.
               </p>
             </div>
           </div>
@@ -192,8 +187,7 @@ export default function Home() {
                 Red
               </h2>
               <p className="mt-2 satu-text text-xs">
-                Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                dan Machine Learning.
+                Menunjukkan intensitas warna merah pada permukaan kulit buah. Peningkatan nilai merah sering kali menandakan buah sedang mendekati kematangan sempurna, karena pigmen alami seperti karotenoid mulai muncul.
               </p>
             </div>
             <div className="flex flex-col dua-bg p-4 rounded-lg">
@@ -204,8 +198,7 @@ export default function Home() {
                 Green
               </h2>
               <p className="mt-2 satu-text text-xs">
-                Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                dan Machine Learning.
+                Menggambarkan tingkat warna hijau pada kulit buah. Semakin rendah nilai hijau, semakin besar kemungkinan bahwa klorofil dalam kulit buah mulai berkurang—tanda bahwa buah sedang menuju fase matang.
               </p>
             </div>
             <div className="flex flex-col dua-bg p-4 rounded-lg">
@@ -216,8 +209,7 @@ export default function Home() {
                 Blue
               </h2>
               <p className="mt-2 satu-text text-xs">
-                Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
-                dan Machine Learning.
+                Merepresentasikan kandungan komponen biru pada warna kulit buah. Nilai ini membantu sistem dalam mengenali perubahan warna secara lebih akurat, terutama ketika buah mengalami transisi dari hijau ke kuning atau kemerahan.
               </p>
             </div>
           </div>
