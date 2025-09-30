@@ -83,11 +83,18 @@ export default function Home() {
               Sistem untuk memprediksi tingkat kematangan buah dengan sensor gas
               dan machine learning.
             </p>
-            <button 
-              onClick={() => setIsPopupOpen(true)}
-              className={`mt-4 tiga-bg satu-text px-4 py-2 rounded-lg shadow hover:bg-gray-500`}>
-              Mulai
-            </button>
+            <div className="flex flex-row justify-between gap-3">
+              <button 
+                onClick={() => setIsPopupOpen(true)}
+                className={`flex-1 mt-4 tiga-bg satu-text px-4 py-2 rounded-lg shadow hover:bg-gray-500`}>
+                Simpan Data
+              </button>
+              <button 
+                onClick={() => setIsPopupOpen(true)}
+                className={`flex-1 mt-4 tiga-bg satu-text px-4 py-2 rounded-lg shadow hover:bg-gray-500`}>
+                Mulai Analisis Data
+              </button>
+            </div>
           </div>
         </div>
 
