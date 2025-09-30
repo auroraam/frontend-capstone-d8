@@ -1,9 +1,12 @@
 "use client";
 import Image from "next/image";
 import { Comic_Neue } from 'next/font/google'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PopUp from "./components/popUp";
 import axios from "axios";
+import Header from "./components/Header";
+import PopUpDevice from "./components/PopUpDevice";
+import PopUpDisconnect from "./components/PopUpDisconnect";
 import PopUpPisang from "./components/popUpPisang";
 
 const comic = Comic_Neue({
@@ -13,7 +16,11 @@ const comic = Comic_Neue({
 });
 
 export default function Home() {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // untuk PopUpPisang
+  const [isDevicePopupOpen, setIsDevicePopupOpen] = useState(false); // untuk connect
+  const [isDisconnectPopupOpen, setIsDisconnectPopupOpen] = useState(false); // untuk disconnect
+  const [idDevice, setIdDevice] = useState(null);
+
   const [popup, setPopup] = useState({
     isOpen: false,
     status: "loading",
@@ -54,15 +61,26 @@ export default function Home() {
     }    
   };
 
+  // Auto-connect saat reload
+  useEffect(() => {
+    const savedId = localStorage.getItem("idDevice");
+    if (savedId) setIdDevice(savedId);
+  }, []);
+
+  const handleConnectDevice = (deviceId) => {
+    localStorage.setItem("idDevice", deviceId);
+    setIdDevice(deviceId);
+  };
+
+  const handleDisconnectDevice = () => {
+    localStorage.removeItem("idDevice");
+    setIdDevice(null);
+  };
+
   return (
     <div className={`min-h-screen bg-bg ${comic.className}`}>
       {/* Header */}
-      <header className="satu-bg px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="w-3 h-3 rounded-full tiga-bg"></div>
-          <h1 className="font-semibold tiga-text">Capstone D-8</h1>
-        </div>
-      </header>
+      <Header onConnect={() => setIsDevicePopupOpen(true)} idDevice={idDevice} onDisconnect={() => setIsDisconnectPopupOpen(true)} />
 
       <div className="px-40 mt-10">
         {/* opening */}
@@ -223,6 +241,21 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Popup Connect Device */}
+      <PopUpDevice
+        isOpen={isDevicePopupOpen}
+        onClose={() => setIsDevicePopupOpen(false)}
+        onConnect={handleConnectDevice}
+      />
+
+      {/* Popup Disconnect Device */}
+      <PopUpDisconnect
+        isOpen={isDisconnectPopupOpen}
+        onClose={() => setIsDisconnectPopupOpen(false)}
+        onDisconnect={handleDisconnectDevice}
+        idDevice={idDevice}
+      />
 
       <PopUp
         isOpen={popup.isOpen}
