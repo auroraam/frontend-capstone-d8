@@ -2,8 +2,10 @@
 import Image from "next/image";
 import { Comic_Neue } from 'next/font/google'
 import { useState, useEffect } from "react";
-import PopUp from "./components/popUp";
 import axios from "axios";
+import mqtt from "mqtt";
+
+import PopUp from "./components/popUp";
 import Header from "./components/Header";
 import PopUpDevice from "./components/PopUpDevice";
 import PopUpDisconnect from "./components/PopUpDisconnect";
@@ -20,6 +22,8 @@ export default function Home() {
   const [isDevicePopupOpen, setIsDevicePopupOpen] = useState(false); // untuk connect
   const [isDisconnectPopupOpen, setIsDisconnectPopupOpen] = useState(false); // untuk disconnect
   const [idDevice, setIdDevice] = useState(null);
+  const [mqttClient, setMqttClient] = useState(null);
+
 
   const [popup, setPopup] = useState({
     isOpen: false,
@@ -28,13 +32,13 @@ export default function Home() {
   });
 
   const [result, setResult] = useState({
-    klasifikasi: "...",
-    prediksi: "...",
-    tvoc: "...",
-    co2: "...",
-    r: "...",
-    g: "...",
-    b: "...",
+    klasifikasi: null,
+    prediksi: null,
+    tvoc: null,
+    co2: null,
+    r: null,
+    g: null,
+    b: null,
   });
 
   const handleSubmit = async (data) => {
@@ -67,14 +71,85 @@ export default function Home() {
     if (savedId) setIdDevice(savedId);
   }, []);
 
-  const handleConnectDevice = (deviceId) => {
+  const handleConnectDevice = async (deviceId) => {
     localStorage.setItem("idDevice", deviceId);
     setIdDevice(deviceId);
+
+    try {
+      // Panggil REST API startPredict
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL_TEST}/api/predict/start`,
+        { idDevice: deviceId }
+      );
+
+      // Buat koneksi MQTT
+      const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_URL || "ws://test.mosquitto.org:8080");
+
+      client.on("connect", () => {
+        const predictionTopic = `device-${deviceId}/prediction`;
+        client.subscribe(predictionTopic, { qos: 1 });
+        console.log("Subscribed to:", predictionTopic);
+      });
+
+      client.on("message", (topic, message) => {
+        try {
+          const payload = JSON.parse(message.toString());
+          console.log("Prediction received:", payload);
+          setResult({
+            klasifikasi: payload.ripeness || null,
+            prediksi: payload.nextPhase || null,
+            tvoc: payload.sensor?.tvoc || null,
+            co2: payload.sensor?.co2 || null,
+            r: payload.sensor?.r || null,
+            g: payload.sensor?.g || null,
+            b: payload.sensor?.b || null,
+          });
+        } catch (e) {
+          console.error("Invalid prediction payload:", e);
+        }
+      });
+
+      setMqttClient(client);
+    } catch (err) {
+      console.error("Gagal memulai prediksi:", err);
+    }
   };
 
-  const handleDisconnectDevice = () => {
+  const handleDisconnectDevice = async () => {
+    if (!idDevice) return;
+
+    try {
+      // Panggil REST API stopPredict
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL_TEST}/api/predict/stop`,
+        { idDevice }
+      );
+      console.log("Backend unsubscribed for device:", idDevice);
+    } catch (err) {
+      console.error("Gagal stopPredict:", err);
+    }
+
+    // Unsubscribe dan end MQTT client
+    if (mqttClient) {
+      const predictionTopic = `device-${idDevice}/prediction`;
+      mqttClient.unsubscribe(predictionTopic, () => {
+        console.log("Unsubscribed from:", predictionTopic);
+        mqttClient.end();
+        setMqttClient(null);
+      });
+    }
+
     localStorage.removeItem("idDevice");
     setIdDevice(null);
+    setResult({
+      klasifikasi: null,
+      prediksi: null,
+      tvoc: null,
+      co2: null,
+      r: null,
+      g: null,
+      b: null,
+    });
   };
 
   return (
@@ -89,8 +164,8 @@ export default function Home() {
             <Image
               src="/image1.png" 
               alt="Hero"
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
             />
           </div>
           <div className="flex flex-col justify-between">
@@ -126,13 +201,13 @@ export default function Home() {
                 <Image
                   src="/image2.png" 
                   alt="Hero"
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  style={{ objectFit: "cover" }}
                 />
               </div>
               <div className="flex flex-col justify-between">
                 <h2 className="text-base font-bold empat-text">
-                  Kategori Kematangan: {result.klasifikasi}
+                  Kategori Kematangan: {result.klasifikasi != null ? result.klasifikasi : "..."}
                 </h2>
                 <p className="mt-2 empat-text text-xs">
                   Kategori ini menunjukkan tingkat kematangan buah berdasarkan hasil analisis sensor warna yang diproses menggunakan algoritma Machine Learning. Nilai ini membantu menentukan apakah buah sudah matang, masih mentah, atau busuk.
@@ -144,13 +219,13 @@ export default function Home() {
                 <Image
                   src="/image3.png" 
                   alt="Hero"
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  style={{ objectFit: "cover" }}
                 />
               </div>
               <div className="flex flex-col justify-between">
                 <h2 className="text-base font-bold empat-text">
-                  Hari Menuju Matang: {result.prediksi}
+                  Hari Menuju Fase Kematangan Berikutnya : {result.prediksi != null ? result.prediksi : "..."}
                 </h2>
                 <p className="mt-2 empat-text text-xs">
                   Perkiraan jumlah hari yang dibutuhkan hingga buah mencapai tingkat kematangan ideal. Nilai ini dihitung dari pola perubahan gas yang terdeteksi oleh sensor, sehingga pengguna dapat mengetahui waktu terbaik untuk memanen atau mengonsumsi buah.
@@ -168,7 +243,7 @@ export default function Home() {
           <div className="flex flex-row justify-between pb-4 gap-4">
             <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold text-white">
-                = {result.tvoc}
+                = {result.tvoc != null ? result.tvoc : "..."}
               </h2>
               <h2 className="text-xl font-bold text-white">
                 TVOC
@@ -179,10 +254,10 @@ export default function Home() {
             </div>
             <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold text-white">
-                = {result.co2}
+                = {result.co2 != null ? result.co2 : "..."}
               </h2>
               <h2 className="text-xl font-bold text-white">
-                CO₂eq
+                CO₂
               </h2>
               <p className="mt-2 text-white text-xs">
                 Menggambarkan jumlah gas karbon dioksida ekuivalen yang dihasilkan oleh buah. Nilai ini berhubungan dengan proses respirasi buah—semakin matang buah, biasanya semakin tinggi kadar CO₂ yang terdeteksi.
@@ -199,7 +274,7 @@ export default function Home() {
           <div className="flex flex-row justify-between pb-4 gap-4">
             <div className="flex flex-col dua-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold satu-text">
-                = {result.r}
+                = {result.r != null ? result.r : "..."}
               </h2>
               <h2 className="text-xl font-bold satu-text">
                 Red
@@ -210,7 +285,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col dua-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold satu-text">
-                = {result.g}
+                = {result.g != null ? result.g : "..."}
               </h2>
               <h2 className="text-xl font-bold satu-text">
                 Green
@@ -221,7 +296,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col dua-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold satu-text">
-                = {result.b}
+                = {result.b != null ? result.b : "..."}
               </h2>
               <h2 className="text-xl font-bold satu-text">
                 Blue
