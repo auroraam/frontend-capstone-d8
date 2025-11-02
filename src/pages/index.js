@@ -162,7 +162,7 @@ export default function Home() {
         <div className="flex flex-row gap-8">
           <div className="relative w-full h-48 rounded-sm overflow-hidden">
             <Image
-              src="/image1.png" 
+              src="/capstone_1.png" 
               alt="Hero"
               fill
               style={{ objectFit: "cover" }}
@@ -199,10 +199,10 @@ export default function Home() {
             <div className="flex flex-row gap-3 empat-border p-4 rounded-lg">
               <div className="relative w-full h-24 rounded-sm overflow-hidden">
                 <Image
-                  src="/image2.png" 
+                  src="/capstone_3.png" 
                   alt="Hero"
                   fill
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "contain" }}
                 />
               </div>
               <div className="flex flex-col justify-between">
@@ -217,10 +217,10 @@ export default function Home() {
             <div className="flex flex-row gap-3 empat-border p-4 rounded-lg">
               <div className="relative w-full h-24 rounded-sm overflow-hidden">
                 <Image
-                  src="/image3.png" 
+                  src="/capstone_4.png" 
                   alt="Hero"
                   fill
-                  style={{ objectFit: "cover" }}
+                  style={{ objectFit: "contain" }}
                 />
               </div>
               <div className="flex flex-col justify-between">
@@ -267,12 +267,12 @@ export default function Home() {
         </div>
 
         {/* nilai warna */}
-        <div className="flex flex-col tiga-bg mt-8 px-8 rounded-lg">
+        <div className="flex flex-col empat-bg mt-8 px-8 rounded-lg">
           <h2 className="text-xl font-bold satu-text pt-4 pb-2">
-            Nilai dari Sensor Gas
+            Nilai dari Sensor Warna
           </h2>
           <div className="flex flex-row justify-between pb-4 gap-4">
-            <div className="flex flex-col dua-bg p-4 rounded-lg">
+            <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold satu-text">
                 = {result.r != null ? result.r : "..."}
               </h2>
@@ -283,7 +283,7 @@ export default function Home() {
                 Menunjukkan intensitas warna merah pada permukaan kulit buah. Peningkatan nilai merah sering kali menandakan buah sedang mendekati kematangan sempurna, karena pigmen alami seperti karotenoid mulai muncul.
               </p>
             </div>
-            <div className="flex flex-col dua-bg p-4 rounded-lg">
+            <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold satu-text">
                 = {result.g != null ? result.g : "..."}
               </h2>
@@ -294,7 +294,7 @@ export default function Home() {
                 Menggambarkan tingkat warna hijau pada kulit buah. Semakin rendah nilai hijau, semakin besar kemungkinan bahwa klorofil dalam kulit buah mulai berkurang—tanda bahwa buah sedang menuju fase matang.
               </p>
             </div>
-            <div className="flex flex-col dua-bg p-4 rounded-lg">
+            <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-lg font-bold satu-text">
                 = {result.b != null ? result.b : "..."}
               </h2>
@@ -305,6 +305,12 @@ export default function Home() {
                 Merepresentasikan kandungan komponen biru pada warna kulit buah. Nilai ini membantu sistem dalam mengenali perubahan warna secara lebih akurat, terutama ketika buah mengalami transisi dari hijau ke kuning atau kemerahan.
               </p>
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-row mt-10 empat-text">
+          <div className="w-full h-0.5 empat-bg mb-15">
+          <p className="text-lg text-center mt-5">© Tim Capstone D-08 - DTETI UGM.</p>
           </div>
         </div>
       </div>
