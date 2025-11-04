@@ -115,6 +115,32 @@ export default function Home() {
     }
   };
 
+  const handleTesting = async (kataKirim) => {
+  const idDevice = "stm-001";
+
+  if (!kataKirim) {
+    console.error("Tidak ada kata yang dikirim!");
+    return;
+  }
+
+  try {
+    console.log(`Mengirim: idDevice="${idDevice}", kata="${kataKirim}"`);
+
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/testing/dummy`, 
+      { 
+        idDevice: idDevice, 
+        kata: kataKirim
+      }
+    );
+
+    console.log("Sukses! Respons server:", res.data);
+  
+  } catch (error) { 
+    console.error("Error:", error.response?.data?.message || error.message);
+  }
+};
+
   const handleDisconnectDevice = async () => {
     if (!idDevice) return;
 
@@ -185,6 +211,11 @@ export default function Home() {
                 onClick={() => setIsPopupOpen(true)}
                 className={`flex-1 mt-4 tiga-bg satu-text px-4 py-2 rounded-lg shadow hover:bg-gray-500`}>
                 Mulai Analisis Data
+              </button>
+              <button 
+                onClick={() => handleTesting("Start")}
+                className={`flex-1 mt-4 tiga-bg satu-text px-4 py-2 rounded-lg shadow hover:bg-gray-500`}>
+                Test
               </button>
             </div>
           </div>
