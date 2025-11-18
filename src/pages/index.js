@@ -78,12 +78,12 @@ export default function Home() {
     try {
       // Panggil REST API startPredict
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL_TEST}/api/predict/start`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/predict/start`,
         { idDevice: deviceId }
       );
 
       // Buat koneksi MQTT
-      const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_URL || "ws://test.mosquitto.org:8080");
+      const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_URL);
 
       client.on("connect", () => {
         const predictionTopic = `device-${deviceId}/prediction`;
@@ -94,16 +94,22 @@ export default function Home() {
       client.on("message", (topic, message) => {
         try {
           const payload = JSON.parse(message.toString());
-          console.log("Prediction received:", payload);
-          setResult({
-            klasifikasi: payload.ripeness || null,
-            prediksi: payload.nextPhase || null,
-            tvoc: payload.sensor?.tvoc || null,
-            co2: payload.sensor?.co2 || null,
-            r: payload.sensor?.r || null,
-            g: payload.sensor?.g || null,
-            b: payload.sensor?.b || null,
-          });
+          console.log("Ripeness received:", payload.ripeness);
+          console.log("NextPhase received:", payload.nextPhase);
+          console.log("CO2 received:", payload.sensor?.co2);
+          console.log("TVOC received:", payload.sensor?.tvoc);
+          console.log("R received:", payload.sensor?.r);
+          console.log("G received:", payload.sensor?.g);
+          console.log("B received:", payload.sensor?.b);
+          // setResult({
+          //   klasifikasi: payload.ripeness || null,
+          //   prediksi: payload.nextPhase || null,
+          //   tvoc: payload.sensor?.tvoc || null,
+          //   co2: payload.sensor?.co2 || null,
+          //   r: payload.sensor?.r || null,
+          //   g: payload.sensor?.g || null,
+          //   b: payload.sensor?.b || null,
+          // });
         } catch (e) {
           console.error("Invalid prediction payload:", e);
         }
@@ -147,7 +153,7 @@ export default function Home() {
     try {
       // Panggil REST API stopPredict
       await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL_TEST}/api/predict/stop`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/predict/stop`,
         { idDevice }
       );
       console.log("Backend unsubscribed for device:", idDevice);
