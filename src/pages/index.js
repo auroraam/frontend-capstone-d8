@@ -65,12 +65,6 @@ export default function Home() {
     }    
   };
 
-  // Auto-connect saat reload
-  useEffect(() => {
-    const savedId = localStorage.getItem("idDevice");
-    if (savedId) setIdDevice(savedId);
-  }, []);
-
   const handleConnectDevice = async (deviceId) => {
     localStorage.setItem("idDevice", deviceId);
     setIdDevice(deviceId);
@@ -93,16 +87,18 @@ export default function Home() {
 
       client.on("message", (topic, message) => {
         try {
-          console.log("Topic:", topic);
           const payload = JSON.parse(message.toString());
-          setResult({
-            klasifikasi: payload.ripeness || null,
-            prediksi: payload.nextPhase || null,
-            tvoc: payload.sensor?.tvoc || null,
-            co2: payload.sensor?.co2 || null,
-            r: payload.sensor?.r || null,
-            g: payload.sensor?.g || null,
-            b: payload.sensor?.b || null,
+          setResult(prev => {
+            const updated = {
+              klasifikasi: payload.ripeness,
+              prediksi: payload.nextPhase,
+              tvoc: payload.sensor?.tvoc,
+              co2: payload.sensor?.co2,
+              r: payload.sensor?.r,
+              g: payload.sensor?.g,
+              b: payload.sensor?.b,
+            };
+            return updated;
           });
         } catch (e) {
           console.error("Invalid prediction payload:", e);
@@ -116,30 +112,30 @@ export default function Home() {
   };
 
   const handleTesting = async (kataKirim) => {
-    const idDevice = "esp32/cpstn";
+  const idDevice = "esp32/cpstn";
 
-    if (!kataKirim) {
-      console.error("Tidak ada kata yang dikirim!");
-      return;
-    }
+  if (!kataKirim) {
+    console.error("Tidak ada kata yang dikirim!");
+    return;
+  }
 
-    try {
-      console.log(`Mengirim: idDevice="${idDevice}", kata="${kataKirim}"`);
+  try {
+    console.log(`Mengirim: idDevice="${idDevice}", kata="${kataKirim}"`);
 
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/testing/dummy`, 
-        { 
-          idDevice: idDevice, 
-          kata: kataKirim
-        }
-      );
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/testing/dummy`, 
+      { 
+        idDevice: idDevice, 
+        kata: kataKirim
+      }
+    );
 
-      console.log("Sukses! Respons server:", res.data);
-    
-    } catch (error) { 
-      console.error("Error:", error.response?.data?.message || error.message);
-    }
-  };
+    console.log("Sukses! Respons server:", res.data);
+  
+  } catch (error) { 
+    console.error("Error:", error.response?.data?.message || error.message);
+  }
+};
 
   const handleDisconnectDevice = async () => {
     if (!idDevice) return;
