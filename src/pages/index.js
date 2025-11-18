@@ -93,23 +93,17 @@ export default function Home() {
 
       client.on("message", (topic, message) => {
         try {
+          console.log("Topic:", topic);
           const payload = JSON.parse(message.toString());
-          console.log("Ripeness received:", payload.ripeness);
-          console.log("NextPhase received:", payload.nextPhase);
-          console.log("CO2 received:", payload.sensor?.co2);
-          console.log("TVOC received:", payload.sensor?.tvoc);
-          console.log("R received:", payload.sensor?.r);
-          console.log("G received:", payload.sensor?.g);
-          console.log("B received:", payload.sensor?.b);
-          // setResult({
-          //   klasifikasi: payload.ripeness || null,
-          //   prediksi: payload.nextPhase || null,
-          //   tvoc: payload.sensor?.tvoc || null,
-          //   co2: payload.sensor?.co2 || null,
-          //   r: payload.sensor?.r || null,
-          //   g: payload.sensor?.g || null,
-          //   b: payload.sensor?.b || null,
-          // });
+          setResult({
+            klasifikasi: payload.ripeness || null,
+            prediksi: payload.nextPhase || null,
+            tvoc: payload.sensor?.tvoc || null,
+            co2: payload.sensor?.co2 || null,
+            r: payload.sensor?.r || null,
+            g: payload.sensor?.g || null,
+            b: payload.sensor?.b || null,
+          });
         } catch (e) {
           console.error("Invalid prediction payload:", e);
         }
@@ -122,30 +116,30 @@ export default function Home() {
   };
 
   const handleTesting = async (kataKirim) => {
-  const idDevice = "esp32/cpstn";
+    const idDevice = "esp32/cpstn";
 
-  if (!kataKirim) {
-    console.error("Tidak ada kata yang dikirim!");
-    return;
-  }
+    if (!kataKirim) {
+      console.error("Tidak ada kata yang dikirim!");
+      return;
+    }
 
-  try {
-    console.log(`Mengirim: idDevice="${idDevice}", kata="${kataKirim}"`);
+    try {
+      console.log(`Mengirim: idDevice="${idDevice}", kata="${kataKirim}"`);
 
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/testing/dummy`, 
-      { 
-        idDevice: idDevice, 
-        kata: kataKirim
-      }
-    );
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/testing/dummy`, 
+        { 
+          idDevice: idDevice, 
+          kata: kataKirim
+        }
+      );
 
-    console.log("Sukses! Respons server:", res.data);
-  
-  } catch (error) { 
-    console.error("Error:", error.response?.data?.message || error.message);
-  }
-};
+      console.log("Sukses! Respons server:", res.data);
+    
+    } catch (error) { 
+      console.error("Error:", error.response?.data?.message || error.message);
+    }
+  };
 
   const handleDisconnectDevice = async () => {
     if (!idDevice) return;
