@@ -20,7 +20,7 @@ export default function PopUpDevice({ isOpen, onClose, onConnect }) {
       <div className="fixed inset-0 bg-black opacity-30 z-40"></div>
       <div className="fixed inset-0 flex justify-center items-center z-50 p-4">
         <div className="satu-bg rounded-lg max-w-md w-full p-6 shadow-md border">
-          <h2 className="text-xl font-semibold mb-4 text-center">
+          <h2 className="text-xl text-black font-semibold mb-4 text-center">
             Connect Device
           </h2>
 

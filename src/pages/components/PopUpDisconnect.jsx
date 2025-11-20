@@ -7,10 +7,10 @@ export default function PopUpDisconnect({ isOpen, onClose, onDisconnect, idDevic
       <div className="fixed inset-0 bg-black opacity-30 z-40"></div>
       <div className="fixed inset-0 flex justify-center items-center z-50 p-4">
         <div className="satu-bg rounded-lg max-w-md w-full p-6 shadow-md border">
-          <h2 className="text-xl font-semibold mb-4 text-center">
+          <h2 className="text-xl font-semibold mb-4 text-center text-black">
             Disconnect Device
           </h2>
-          <p className="mb-4 text-center">
+          <p className="mb-4 text-center text-black">
             Apakah kamu yakin ingin memutuskan koneksi dengan device <b>{idDevice}</b>?
           </p>
           <div className="flex justify-end gap-2">

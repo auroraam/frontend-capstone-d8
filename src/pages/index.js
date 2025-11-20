@@ -66,11 +66,16 @@ export default function Home() {
   };
 
   const handleConnectDevice = async (deviceId) => {
-    localStorage.setItem("idDevice", deviceId);
-    setIdDevice(deviceId);
+    setPopup({
+      isOpen: true,
+      status: "loading",
+      message: "Menghubungkan ke Device...",
+    });
 
     try {
-      // Panggil REST API startPredict
+      localStorage.setItem("idDevice", deviceId);
+      setIdDevice(deviceId);
+
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/predict/start`,
         { idDevice: deviceId }
@@ -83,12 +88,20 @@ export default function Home() {
         const predictionTopic = `device-${deviceId}/prediction`;
         client.subscribe(predictionTopic, { qos: 1 });
         console.log("Subscribed to:", predictionTopic);
+        setPopup({
+          isOpen: true,
+          status: "success",
+          message: "Terhubung! Menunggu data sensor...",
+        });
+        setTimeout(() => {
+             setPopup(prev => ({ ...prev, isOpen: false }));
+          }, 3000);
       });
 
       client.on("message", (topic, message) => {
         try {
           const payload = JSON.parse(message.toString());
-          setResult(prev => {
+          setResult((prev) => {
             const updated = {
               klasifikasi: payload.ripeness,
               prediksi: payload.nextPhase,
@@ -100,78 +113,92 @@ export default function Home() {
             };
             return updated;
           });
+          setPopup({
+            isOpen: true,
+            status: "success",
+            message: "Data diterima! Menampilkan hasil klasifikasi & prediksi.",
+          });
+          setTimeout(() => {
+             setPopup(prev => ({ ...prev, isOpen: false }));
+          }, 3000);
         } catch (e) {
           console.error("Invalid prediction payload:", e);
         }
       });
 
       setMqttClient(client);
+
+      setPopup({
+        isOpen: true,
+        status: "success",
+        message: "Berhasil Terhubung ke Device",
+      });
+
     } catch (err) {
       console.error("Gagal memulai prediksi:", err);
+      
+      setPopup({
+        isOpen: true,
+        status: "error",
+        message: err.response?.data?.message || err.response?.data?.error || "Gagal menghubungkan device",
+      });
     }
   };
-
-  const handleTesting = async (kataKirim) => {
-  const idDevice = "esp32/cpstn";
-
-  if (!kataKirim) {
-    console.error("Tidak ada kata yang dikirim!");
-    return;
-  }
-
-  try {
-    console.log(`Mengirim: idDevice="${idDevice}", kata="${kataKirim}"`);
-
-    const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/testing/dummy`, 
-      { 
-        idDevice: idDevice, 
-        kata: kataKirim
-      }
-    );
-
-    console.log("Sukses! Respons server:", res.data);
-  
-  } catch (error) { 
-    console.error("Error:", error.response?.data?.message || error.message);
-  }
-};
 
   const handleDisconnectDevice = async () => {
     if (!idDevice) return;
 
+    setPopup({
+      isOpen: true,
+      status: "loading",
+      message: "Memutuskan koneksi...",
+    });
+
     try {
-      // Panggil REST API stopPredict
       await axios.post(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/predict/stop`,
         { idDevice }
       );
       console.log("Backend unsubscribed for device:", idDevice);
+
+      // Unsubscribe dan end MQTT client
+      if (mqttClient) {
+        const predictionTopic = `device-${idDevice}/prediction`;
+        mqttClient.unsubscribe(predictionTopic, () => {
+          console.log("Unsubscribed from:", predictionTopic);
+          mqttClient.end();
+          setMqttClient(null);
+        });
+      }
+
+      localStorage.removeItem("idDevice");
+      setIdDevice(null);
+      setResult({
+        klasifikasi: null,
+        prediksi: null,
+        tvoc: null,
+        co2: null,
+        r: null,
+        g: null,
+        b: null,
+      });
+
+      setPopup({
+        isOpen: true,
+        status: "success",
+        message: "Koneksi Berhasil Diputus",
+      });
+
     } catch (err) {
       console.error("Gagal stopPredict:", err);
-    }
 
-    // Unsubscribe dan end MQTT client
-    if (mqttClient) {
-      const predictionTopic = `device-${idDevice}/prediction`;
-      mqttClient.unsubscribe(predictionTopic, () => {
-        console.log("Unsubscribed from:", predictionTopic);
-        mqttClient.end();
-        setMqttClient(null);
+      // 3. Set status ERROR
+      setPopup({
+        isOpen: true,
+        status: "error",
+        message: err.response?.data?.message || "Gagal memutuskan koneksi",
       });
     }
-
-    localStorage.removeItem("idDevice");
-    setIdDevice(null);
-    setResult({
-      klasifikasi: null,
-      prediksi: null,
-      tvoc: null,
-      co2: null,
-      r: null,
-      g: null,
-      b: null,
-    });
   };
 
   const ExpandableText = ({ text, limit = 80, className = "empat-text", buttonColor = "text-blue-600" }) => {
@@ -201,11 +228,11 @@ export default function Home() {
       <div className="px-4 md:px-10 lg:px-20 xl:px-40 mt-6 md:mt-10">
         
         {/* Hero Section */}
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="relative justify-center items-center flex flex-col sm:flex-row gap-4 w-full">
           {/* Gambar Hero */}
-          <div className="relative w-full lg:w-1/2 h-64 md:h-80 rounded-sm overflow-hidden shrink-0 bg-white p-4 flex items-center justify-center">
+          <div className="relative w-full sm:w-64 h-32 sm:h-64 rounded-sm overflow-hidden shrink-0 p-4 flex items-center justify-center">
             <Image
-              src="/capstone_1_2.png" 
+              src="/capstone_1_4.png" 
               alt="Hero"
               fill
               style={{ objectFit: "contain" }}
@@ -213,7 +240,7 @@ export default function Home() {
           </div>
           
           {/* Teks & Tombol */}
-          <div className="flex flex-col justify-between w-full lg:w-1/2">
+          <div className="w-full text-center sm:text-left items-center sm:items-start flex flex-col gap-4 w-full lg:w-1/2">
             <div>
               <h2 className="text-xl md:text-2xl font-bold tiga-text">
                 Klasifikasi dan Prediksi Tingkat Kematangan
@@ -221,26 +248,6 @@ export default function Home() {
               <p className="mt-2 tiga-text text-sm md:text-base">
                 Prediksi kematangan buah pisang yang lebih akurat menggunakan sistem dengan sensor gas, sensor warna, dan kecerdasan buatan.
               </p>
-            </div>
-            
-            {/* Tombol Actions */}
-            <div className="flex flex-col sm:flex-row justify-between gap-3 mt-4 lg:mt-0">
-              <button 
-                onClick={() => setIsPopupOpen(true)}
-                className={`flex-1 three-bg satu-text px-4 py-3 rounded-lg shadow hover:bg-gray-500 text-sm md:text-base bg-[#yourColorHere] tiga-bg`}>
-                {/* Note: Pastikan class 'tiga-bg' memiliki definisi background-color */}
-                Simpan Data
-              </button>
-              <button 
-                onClick={() => setIsPopupOpen(true)}
-                className={`flex-1 three-bg satu-text px-4 py-3 rounded-lg shadow hover:bg-gray-500 text-sm md:text-base tiga-bg`}>
-                Mulai Analisis
-              </button>
-              <button 
-                onClick={() => handleTesting("Start")}
-                className={`flex-1 three-bg satu-text px-4 py-3 rounded-lg shadow hover:bg-gray-500 text-sm md:text-base tiga-bg`}>
-                Test
-              </button>
             </div>
           </div>
         </div>
@@ -267,10 +274,9 @@ export default function Home() {
                 <h2 className="text-base font-bold empat-text text-lg">
                   Kategori Kematangan: {result.klasifikasi != null ? result.klasifikasi : "..."}
                 </h2>
-                <ExpandableText 
-                  className="empat-text"
-                  text="Kategori ini menunjukkan tingkat kematangan buah berdasarkan hasil analisis sensor warna yang diproses menggunakan algoritma Machine Learning. Nilai ini membantu menentukan apakah buah sudah matang, masih mentah, atau busuk."
-                />
+                <p className="mt-2 text-xs leading-relaxed empat-text">
+                  Kategori ini menunjukkan tingkat kematangan buah berdasarkan hasil analisis sensor warna yang diproses menggunakan algoritma Machine Learning. Nilai ini membantu menentukan apakah buah sudah matang, masih mentah, atau busuk.
+                </p>
               </div>
             </div>
 
@@ -286,12 +292,11 @@ export default function Home() {
               </div>
               <div className="flex flex-col justify-center w-full sm:w-2/3">
                 <h2 className="text-base font-bold empat-text text-lg">
-                  Next Phase: {result.prediksi != null ? result.prediksi : "..."}
+                  Next Phase: {result.prediksi != null ? result.prediksi : "..."} Hari
                 </h2>
-                <ExpandableText 
-                   className="empat-text"
-                   text="Perkiraan jumlah hari yang dibutuhkan hingga buah mencapai tingkat kematangan ideal. Nilai ini dihitung dari pola perubahan gas yang terdeteksi oleh sensor, sehingga pengguna dapat mengetahui waktu terbaik untuk memanen atau mengonsumsi buah."
-                />
+                <p className="mt-2 text-xs leading-relaxed empat-text">
+                  Perkiraan jumlah hari yang dibutuhkan hingga buah mencapai tingkat kematangan ideal. Nilai ini dihitung dari pola perubahan gas yang terdeteksi oleh sensor, sehingga pengguna dapat mengetahui waktu terbaik untuk memanen atau mengonsumsi buah.
+                </p>
               </div>
             </div>
           </div>
