@@ -101,10 +101,33 @@ export default function Home() {
       client.on("message", (topic, message) => {
         try {
           const payload = JSON.parse(message.toString());
+          let ripeLevel = null;
+          if (payload.ripeness == "raw") {
+            ripeLevel ="mentah";
+          }
+          else if (payload.ripeness == "ripe") {
+            ripeLevel = "matang";
+          }
+          else {
+            ripeLevel = "busuk";
+          }
+          let phaseLevel = null;
+          if (ripeLevel == "busuk") {
+            phaseLevel = "0";
+          } else {
+            const rawPhase = parseFloat(payload.nextPhase);
+            
+            if (!isNaN(rawPhase)) {
+               // Mengambil 2 angka di belakang koma
+               phaseLevel = rawPhase.toFixed(2); 
+            } else {
+               phaseLevel = payload.nextPhase; 
+            }
+          }
           setResult((prev) => {
             const updated = {
-              klasifikasi: payload.ripeness,
-              prediksi: payload.nextPhase,
+              klasifikasi: ripeLevel,
+              prediksi: phaseLevel,
               tvoc: payload.sensor?.tvoc,
               co2: payload.sensor?.co2,
               r: payload.sensor?.r,
@@ -275,7 +298,7 @@ export default function Home() {
                   Kategori Kematangan: {result.klasifikasi != null ? result.klasifikasi : "..."}
                 </h2>
                 <p className="mt-2 text-xs leading-relaxed empat-text">
-                  Kategori ini menunjukkan tingkat kematangan buah berdasarkan hasil analisis sensor warna yang diproses menggunakan algoritma Machine Learning. Nilai ini membantu menentukan apakah buah sudah matang, masih mentah, atau busuk.
+                  Kategori ini menentukan status kematangan buah (mentah, matang, atau busuk) menggunakan analisis sensor warna berbasis Machine Learning.
                 </p>
               </div>
             </div>
@@ -292,10 +315,10 @@ export default function Home() {
               </div>
               <div className="flex flex-col justify-center w-full sm:w-2/3">
                 <h2 className="text-base font-bold empat-text text-lg">
-                  Next Phase: {result.prediksi != null ? result.prediksi : "..."} Hari
+                  {result.prediksi != null ? (result.prediksi + " hari") : "Fase Berikutnya"}
                 </h2>
                 <p className="mt-2 text-xs leading-relaxed empat-text">
-                  Perkiraan jumlah hari yang dibutuhkan hingga buah mencapai tingkat kematangan ideal. Nilai ini dihitung dari pola perubahan gas yang terdeteksi oleh sensor, sehingga pengguna dapat mengetahui waktu terbaik untuk memanen atau mengonsumsi buah.
+                  Nilai ini mengestimasi sisa hari menuju kematangan berikutnya berdasarkan analisis sensor gas untuk menentukan waktu panen atau konsumsi terbaik.
                 </p>
               </div>
             </div>
@@ -313,20 +336,18 @@ export default function Home() {
                 {result.tvoc != null ? result.tvoc : "..."}
               </h2>
               <h2 className="text-lg font-bold text-white">TVOC</h2>
-              <ExpandableText 
-                className="text-white"
-                text="Menunjukkan total senyawa organik volatil yang dilepaskan oleh buah selama proses pematangan. Semakin tinggi nilai TVOC, umumnya menandakan bahwa buah sedang berada pada fase aktif pematangan akibat peningkatan aktivitas biokimia di dalamnya."
-              />
+              <p className="mt-2 text-xs leading-relaxed text-white">
+                Total senyawa organik volatil yang dilepaskan, di mana nilai tinggi menandakan buah sedang dalam fase aktif pematangan.
+              </p>
             </div>
             <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-2xl font-bold text-white">
                 {result.co2 != null ? result.co2 : "..."}
               </h2>
               <h2 className="text-lg font-bold text-white">CO₂</h2>
-              <ExpandableText 
-                className="text-white" 
-                text="Menggambarkan jumlah gas karbon dioksida ekuivalen yang dihasilkan oleh buah. Nilai ini berhubungan dengan proses respirasi buah—semakin matang buah, biasanya semakin tinggi kadar CO₂ yang terdeteksi."
-              />
+              <p className="mt-2 text-xs leading-relaxed text-white">
+                Kadar CO₂ hasil respirasi buah, yang umumnya meningkat seiring bertambahnya tingkat kematangan.
+              </p>
             </div>
           </div>
         </div>
@@ -342,30 +363,27 @@ export default function Home() {
                 {result.r != null ? result.r : "..."}
               </h2>
               <h2 className="text-lg font-bold satu-text">Red</h2>
-              <ExpandableText 
-                className="satu-text"
-                text="Menunjukkan intensitas warna merah pada permukaan kulit buah. Peningkatan nilai merah sering kali menandakan buah sedang mendekati kematangan sempurna, karena pigmen alami seperti karotenoid mulai muncul."
-              />
+              <p className="mt-2 text-xs leading-relaxed satu-text">
+                Mengukur intensitas warna merah pada kulit buah, di mana peningkatannya menandakan buah sedang mendekati kematangan sempurna.
+              </p>
             </div>
             <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-2xl font-bold satu-text">
                 {result.g != null ? result.g : "..."}
               </h2>
               <h2 className="text-lg font-bold satu-text">Green</h2>
-              <ExpandableText 
-                className="satu-text"
-                text="Menggambarkan tingkat warna hijau pada kulit buah. Semakin rendah nilai hijau, semakin besar kemungkinan bahwa klorofil dalam kulit buah mulai berkurang—tanda bahwa buah sedang menuju fase matang."
-              />
+              <p className="mt-2 text-xs leading-relaxed satu-text">
+                Intensitas warna hijau, di mana penurunannya menandakan berkurangnya klorofil seiring proses pematangan buah.
+              </p>
             </div>
             <div className="flex flex-col tiga-bg p-4 rounded-lg">
               <h2 className="text-2xl font-bold satu-text">
                 {result.b != null ? result.b : "..."}
               </h2>
               <h2 className="text-lg font-bold satu-text">Blue</h2>
-              <ExpandableText 
-                className="satu-text"
-                text="Merepresentasikan kandungan komponen biru pada warna kulit buah. Nilai ini membantu sistem dalam mengenali perubahan warna secara lebih akurat, terutama ketika buah mengalami transisi dari hijau ke kuning atau kemerahan."
-              />
+              <p className="mt-2 text-xs leading-relaxed satu-text">
+                Intensitas warna biru untuk membantu sistem mendeteksi transisi perubahan warna buah secara lebih akurat.
+              </p>
             </div>
           </div>
         </div>
